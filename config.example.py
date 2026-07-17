@@ -1,0 +1,3 @@
+BOT_TOKEN = "your token"
+
+ADMIN_IDS = [123456789]
