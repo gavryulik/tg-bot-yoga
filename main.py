@@ -1,14 +1,16 @@
 import asyncio
 from aiogram import Bot, Dispatcher, F
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, CommandObject
 from aiogram.types import CallbackQuery, Message
+from aiogram.fsm.context import FSMContext
+
 
 from config import BOT_TOKEN
 from states import Form
 from handlers import (
     cmd_start, back_to_main, show_booking, back_to_booking,
     universal_booking, process_format, process_day_selection,
-    process_time_selection, process_name, process_phone
+    process_time_selection, process_name, process_phone, show_courses, show_course_detail, show_about_me, deep_link_start
 )
 
 
@@ -18,8 +20,12 @@ dp = Dispatcher()
 # reg handlers
 
 @dp.message(CommandStart())
-async def start_handler(message: Message):
-    await cmd_start(message)
+async def start_handler(
+    message: Message,
+    command: CommandObject,
+    state: FSMContext,
+):
+    await deep_link_start(message, command, state)
 
 
 @dp.callback_query(F.data == "back_to_main")
@@ -35,6 +41,10 @@ async def booking_handler(callback: CallbackQuery):
 @dp.callback_query(F.data == "back_to_booking")
 async def back_booking_handler(callback: CallbackQuery):
     await back_to_booking(callback)
+    
+@dp.callback_query(F.data == "about_me")
+async def about_me_handler(callback: CallbackQuery):
+    await show_about_me(callback)
 
 
 @dp.callback_query(F.data.startswith("book:"))
@@ -65,6 +75,23 @@ async def name_handler(message: Message, state):
 @dp.message(Form.phone)
 async def phone_handler(message: Message, state):
     await process_phone(message, state)
+    
+@dp.callback_query(F.data == "buy_course")
+async def buy_course_handler(callback: CallbackQuery):
+    await show_courses(callback)
+
+@dp.callback_query(F.data.startswith("course:"))
+async def course_detail_handler(callback: CallbackQuery):
+    await show_course_detail(callback)
+
+#@dp.message(F.photo)
+#async def get_photo_file_id(message: Message):
+    # message.photo[-1]
+    #photo_id = message.photo[-1].file_id
+    
+    #print(f"\n[FILE ID]: {photo_id}\n")
+    
+    #await message.reply(f"Реплика вашего file_id:\n<code>{photo_id}</code>", parse_mode="HTML")
 
 
 # start bot
