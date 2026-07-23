@@ -10,7 +10,7 @@ from states import Form
 from handlers import (
     cmd_start, back_to_main, show_booking, back_to_booking,
     universal_booking, process_format, process_day_selection,
-    process_time_selection, process_name, process_phone, show_courses, show_course_detail, show_about_me, deep_link_start
+    process_time_selection, process_name, process_phone, show_courses, show_course_detail, show_about_me, deep_link_start, buy_course, receipt_handler, approve_payment, reject_payment
 )
 
 
@@ -83,6 +83,26 @@ async def buy_course_handler(callback: CallbackQuery):
 @dp.callback_query(F.data.startswith("course:"))
 async def course_detail_handler(callback: CallbackQuery):
     await show_course_detail(callback)
+    
+@dp.callback_query(F.data.startswith("buy:"))
+async def buy_course_handler(callback: CallbackQuery, state: FSMContext):
+    await buy_course(callback, state)
+    
+@dp.message(Form.receipt, F.photo)
+async def receipt_photo_handler(message: Message, state: FSMContext):
+    await receipt_handler(message, state)
+    
+@dp.message(Form.receipt, F.document)
+async def receipt_document_handler(message: Message, state: FSMContext):
+    await receipt_handler(message, state)
+    
+@dp.callback_query(F.data.startswith("approve:"))
+async def approve_handler(callback: CallbackQuery):
+    await approve_payment(callback)
+
+@dp.callback_query(F.data.startswith("reject:"))
+async def reject_handler(callback: CallbackQuery):
+    await reject_payment(callback) 
 
 #@dp.message(F.photo)
 #async def get_photo_file_id(message: Message):

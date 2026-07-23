@@ -6,3 +6,4 @@ class Form(StatesGroup):
     phone = State()
     day = State()
     time = State()
+    receipt = State()
